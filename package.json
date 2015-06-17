@@ -1,0 +1,25 @@
+{
+  "name": "isy",
+  "version": "0.0.1",
+  "description": "Wrapper for accessing ISY99 home automation controller APIs",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/.bin/mocha -w",
+    "coverage": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec"
+  },
+  "keywords": [
+    "isy99"
+  ],
+  "author": "Greg \"OverloadUT\" Laabs <OverloadUT@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "node-rest-client": "^1.5.1",
+    "xml2js": "^0.4.9"
+  },
+  "devDependencies": {
+    "chai": "*",
+    "istanbul": "*",
+    "mocha": "*",
+    "sinon": "^1.15.3"
+  }
+}
