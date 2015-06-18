@@ -2,8 +2,7 @@
 'use strict';
 
 var parseString = require("xml2js").parseString;
-var Client = require('node-rest-client').Client;
-var rest_client = new Client();
+var restClient = require('node-rest-client').Client;
 
 function ISY(options) {
     //hide "new"
@@ -14,15 +13,13 @@ function ISY(options) {
     //make params optional
     options = options||{};
 
-    console.log(options);
-
 	this._host = options.host || 'isy'; // Default host is "isy" which will work if you are in the same network
 	this._port = options.port || 80;
-	this._https = options.https || false;
+	this._https = options.https == 'true';
 	this._user = options.user || 'admin';
 	this._pass = options.pass || 'admin';
 
-	this._restClient = new Client({user:this._user,password:this._pass});
+	this._restClient = new restClient({user:this._user,password:this._pass});
 }
 
 ISY.prototype.request = function(path, callback) {
@@ -34,16 +31,16 @@ ISY.prototype.request = function(path, callback) {
 	self._restClient.get(fullpath, function(data, response){
 
 		if(response.statusCode >= 300 || response.statusCode < 200) {
-			return callback(new Error('something bad happened'));
+			return callback(new Error('Got a non-200 HTTP status code', response.statusCode));
 		}
 
-		parseString(data.toString(), function(err, jsobj){
+		parseString(data.toString(), {explicitArray: false}, function(err, jsobj){
 			callback(err, jsobj);
 		});
 	});
 };
 
-ISY.prototype.getNode = function(address, callback) {
+ISY.prototype.getDeviceInfo = function(address, callback) {
 	var self = this;
 
 	self.request("rest/nodes/" + address, function(err, data){
@@ -57,11 +54,33 @@ ISY.prototype.getNode = function(address, callback) {
 	});
 };
 
+ISY.prototype.sendDeviceCommand = function(address, command, callback) {
+	var self = this;
+
+	self.request("rest/nodes/"+address+"/cmd/"+command, function(err, data){
+		if(err) {
+			return callback(err);
+		}
+
+		if(!('RestResponse' in data)) {
+			return callback(new Error("Unexpected response from server (no 'RestResponse' XML node)", data));
+		}
+
+		if(data.RestResponse.$.succeeded != 'true') {
+			return callback(new Error("ISY reported failure", data));
+		}
+
+		callback(null, data.RestResponse.status);
+	});
+};
+
 function ISYDevice(data) {
-	this.address = data.nodeInfo.node[0].address;
-	this.name = data.nodeInfo.node[0].name;
-	this.enabled = data.nodeInfo.node[0].enabled == "true";
+	var node = data.nodeInfo.node;
+	this.address = node.address;
+	this.name = node.name;
+	this.enabled = node.enabled == "true";
+	this.status = node.property.$.value;
+	this.statusFormatted = node.property.$.formatted;
 }
 
 module.exports = ISY;
-module.exports.rest_client = rest_client; // This is needed for tests
