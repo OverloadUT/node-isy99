@@ -74,6 +74,26 @@ ISY.prototype.sendDeviceCommand = function(address, command, callback) {
 	});
 };
 
+ISY.prototype.sendProgramCommand = function(address, command, callback) {
+	var self = this;
+
+	self.request("rest/programs/"+address+"/"+command, function(err, data){
+		if(err) {
+			return callback(err);
+		}
+
+		if(!('RestResponse' in data)) {
+			return callback(new Error("Unexpected response from server (no 'RestResponse' XML node)", data));
+		}
+
+		if(data.RestResponse.$.succeeded != 'true') {
+			return callback(new Error("ISY reported failure", data));
+		}
+
+		callback(null, data.RestResponse.status);
+	});
+};
+
 function ISYDevice(data) {
 	var node = data.nodeInfo.node;
 	this.address = node.address;

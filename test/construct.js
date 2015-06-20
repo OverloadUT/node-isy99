@@ -104,3 +104,26 @@ describe('Device Commands', function(){
 		});
 	});
 });
+
+describe('Program Commands', function(){
+	var isy = require('../index.js')();
+	
+	before(function(done){
+		sinon
+			.stub(isy._restClient, "get", function(path, callback){
+				if (path.match(/rest\/programs\/[0-9]+\/(runIf|runThen|runElse|stop|enable|disable)/)) {
+					callback('<RestResponse succeeded="true"><status>200</status></RestResponse>', "");
+				} else {
+					callback('<RestResponse succeeded="false"><status>404</status></RestResponse>', "");
+				}
+			});
+		done();
+	});
+	it('RunIf a program', function(done) {
+		isy.sendProgramCommand("0001", "runIf", function(err, statusCode){
+			expect(err).to.be.null;
+			expect(statusCode).to.equal("200");
+			done();
+		});
+	});
+});
