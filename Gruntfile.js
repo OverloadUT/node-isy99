@@ -1,6 +1,3 @@
-/**
- * Created by Greg on 6/26/2015.
- */
 module.exports = function(grunt) {
 
     // Project configuration.
