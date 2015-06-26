@@ -1,14 +1,17 @@
 {
   "name": "isy99",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Wrapper for accessing ISY99 home automation controller APIs",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha -w",
-    "coverage": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec"
+    "test": "grunt coveralls",
+    "coverage": "grunt coverage",
+    "watch": "node_modules/.bin/mocha -w"
   },
   "keywords": [
-    "isy99"
+    "isy99",
+    "Universal Devices",
+    "Insteon"
   ],
   "author": "Greg \"OverloadUT\" Laabs <OverloadUT@gmail.com>",
   "license": "MIT",
@@ -18,8 +21,14 @@
   },
   "devDependencies": {
     "chai": "*",
-    "istanbul": "*",
+    "coveralls": "^2.11.2",
+    "grunt": "^0.4.5",
+    "grunt-mocha-istanbul": "^2.4.0",
+    "grunt-mocha-test": "^0.12.7",
+    "istanbul": "^0.3.16",
     "mocha": "*",
-    "sinon": "^1.15.3"
-  }
+    "sinon": "^1.15.3",
+    "sinon-chai": "^2.8.0"
+  },
+  "repository": "OverloadUT/node-isy99"
 }

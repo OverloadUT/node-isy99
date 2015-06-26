@@ -48,12 +48,16 @@ ISY.prototype.getDeviceInfo = function(address, callback) {
 			return callback(err);
 		}
 
-		var Device = new ISYDevice(data);
-
-		callback(null, Device);
+        if(typeof data.nodeInfo === 'undefined') {
+            return callback(new Error('Error parsing response from ISY'));
+        } else {
+            var Device = new ISYDevice(data.nodeInfo);
+            callback(null, Device);
+        }
 	});
 };
 
+// TODO should we abstract out the different command types?
 ISY.prototype.sendDeviceCommand = function(address, command, callback) {
 	var self = this;
 
@@ -66,11 +70,8 @@ ISY.prototype.sendDeviceCommand = function(address, command, callback) {
 			return callback(new Error("Unexpected response from server (no 'RestResponse' XML node)", data));
 		}
 
-		if(data.RestResponse.$.succeeded != 'true') {
-			return callback(new Error("ISY reported failure", data));
-		}
-
-		callback(null, data.RestResponse.status);
+        var succeeded = data.RestResponse.$.succeeded === 'true';
+		callback(null, succeeded);
 	});
 };
 
@@ -86,16 +87,13 @@ ISY.prototype.sendProgramCommand = function(address, command, callback) {
 			return callback(new Error("Unexpected response from server (no 'RestResponse' XML node)", data));
 		}
 
-		if(data.RestResponse.$.succeeded != 'true') {
-			return callback(new Error("ISY reported failure", data));
-		}
-
-		callback(null, data.RestResponse.status);
+        var succeeded = data.RestResponse.$.succeeded === 'true';
+        callback(null, succeeded);
 	});
 };
 
-function ISYDevice(data) {
-	var node = data.nodeInfo.node;
+function ISYDevice(nodeInfo) {
+	var node = nodeInfo.node;
 	this.address = node.address;
 	this.name = node.name;
 	this.enabled = node.enabled == "true";
